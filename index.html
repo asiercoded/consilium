@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ask the AIs</title>
+    <title>Consilium</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: #0f0f0f;
-            color: #e0e0e0;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
             min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 62, 179, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(26, 86, 179, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(15, 52, 96, 0.2) 0%, transparent 70%);
+            color: #e0e0e0;
             padding: 40px 20px;
         }
 
@@ -19,9 +23,9 @@
             gap: 0;
             max-width: 1100px;
             margin: 0 auto;
-            position: relative;
         }
 
+        /* Sidebar */
         .sidebar {
             width: 0;
             overflow: hidden;
@@ -41,26 +45,31 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #555;
+            color: rgba(255,255,255,0.3);
             margin-bottom: 12px;
         }
 
         .history-item {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
             padding: 10px 12px;
             font-size: 13px;
-            color: #aaa;
+            color: rgba(255,255,255,0.5);
             margin-bottom: 8px;
             cursor: pointer;
-            transition: border-color 0.2s, color 0.2s;
+            transition: all 0.2s;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .history-item:hover { border-color: #444; color: #e0e0e0; }
+        .history-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+            border-color: rgba(255,255,255,0.15);
+        }
 
         .main { flex: 1; min-width: 0; }
 
@@ -72,23 +81,33 @@
         }
 
         .toggle-btn {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            color: #888;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
             padding: 6px 10px;
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
-            transition: color 0.2s, border-color 0.2s;
+            transition: all 0.2s;
             font-family: inherit;
         }
 
-        .toggle-btn:hover { color: #e0e0e0; border-color: #444; opacity: 1; }
+        .toggle-btn:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            opacity: 1;
+        }
 
-        h1 { font-size: 28px; font-weight: 600; color: #ffffff; }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
 
         .subtitle {
-            color: #666;
+            color: rgba(255,255,255,0.35);
             font-size: 14px;
             margin-bottom: 32px;
             margin-left: 46px;
@@ -102,48 +121,54 @@
 
         input {
             flex: 1;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            color: #e0e0e0;
-            padding: 12px 16px;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 12px;
             font-size: 15px;
             font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
-        input:focus { border-color: #555; }
+        input::placeholder { color: rgba(255,255,255,0.25); }
+        input:focus {
+            border-color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+        }
 
         button {
-            background: #ffffff;
+            background: rgba(255,255,255,0.95);
             color: #000000;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
         }
 
         button:hover { opacity: 0.85; }
 
         .question-display {
             font-size: 13px;
-            color: #666;
+            color: rgba(255,255,255,0.3);
             margin-bottom: 20px;
             display: none;
         }
 
-        .question-display span { color: #aaa; }
+        .question-display span { color: rgba(255,255,255,0.6); }
 
         /* Skeleton */
         .skeleton-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
             padding: 24px;
             margin-bottom: 16px;
         }
@@ -151,7 +176,7 @@
         .skeleton-label {
             width: 120px;
             height: 10px;
-            background: #2a2a2a;
+            background: rgba(255,255,255,0.08);
             border-radius: 4px;
             margin-bottom: 16px;
             animation: pulse 1.5s infinite;
@@ -159,7 +184,7 @@
 
         .skeleton-line {
             height: 10px;
-            background: #2a2a2a;
+            background: rgba(255,255,255,0.06);
             border-radius: 4px;
             margin-bottom: 10px;
             animation: pulse 1.5s infinite;
@@ -167,14 +192,16 @@
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            50% { opacity: 0.3; }
         }
 
         /* AI Cards */
         .ai-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
             padding: 24px;
             margin-bottom: 16px;
             border-left: 3px solid transparent;
@@ -188,7 +215,6 @@
         .ai-card:nth-child(3) { animation-delay: 0.2s; border-left-color: #c084fc; }
         .ai-card:nth-child(4) { animation-delay: 0.3s; border-left-color: #fbbf24; }
 
-        /* Waiting cards don't animate */
         .ai-card.waiting {
             opacity: 1;
             transform: none;
@@ -200,8 +226,8 @@
         }
 
         .ai-card.synthesis {
-            background: #161616;
-            border-color: #333;
+            background: rgba(251, 191, 36, 0.05);
+            border-color: rgba(251, 191, 36, 0.2);
         }
 
         .card-header {
@@ -223,8 +249,7 @@
         .ai-sublabel {
             font-size: 11px;
             font-weight: 400;
-            color: #555;
-            margin-left: 2px;
+            color: rgba(255,255,255,0.3);
         }
 
         .ai-badge {
@@ -239,35 +264,44 @@
             flex-shrink: 0;
         }
 
-        .badge-meta { background: #1a3a5c; color: #4a9eff; }
-        .badge-scout { background: #1a3a2a; color: #4ade80; }
-        .badge-openai { background: #2a1a3a; color: #c084fc; }
-        .badge-synthesis { background: #3a2a00; color: #fbbf24; }
+        .badge-meta { background: rgba(74, 158, 255, 0.15); color: #4a9eff; }
+        .badge-scout { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .badge-openai { background: rgba(192, 132, 252, 0.15); color: #c084fc; }
+        .badge-synthesis { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
 
         .copy-btn {
-            background: #2a2a2a;
-            color: #888;
-            border: none;
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 12px;
             cursor: pointer;
             font-family: inherit;
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.2s;
         }
 
-        .copy-btn:hover { background: #333; color: #e0e0e0; opacity: 1; }
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.9);
+            opacity: 1;
+        }
 
         .waiting-text {
             font-size: 14px;
-            color: #444;
+            color: rgba(255,255,255,0.2);
             font-style: italic;
         }
 
         .ai-content {
             font-size: 15px;
             line-height: 1.7;
-            color: #d0d0d0;
+            color: rgba(255,255,255,0.75);
         }
 
         .ai-content p { margin-bottom: 12px; }
@@ -294,7 +328,7 @@
         <div class="main">
             <div class="top-bar">
                 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-                <h1>Ask the AIs</h1>
+                <h1>Consilium</h1>
             </div>
             <p class="subtitle">Three models debate your question. One synthesizes the answer.</p>
 
@@ -321,9 +355,11 @@
             { key: 'synthesis', name: 'Final Synthesis', sub: 'Synthesizer', badgeClass: 'badge-synthesis', badgeText: '⚡', isSynthesis: true },
         ];
 
+        const colors = ['#4a9eff','#4ade80','#c084fc','#fbbf24'];
+
         function renderWaitingCards() {
             document.getElementById("answer").innerHTML = models.map((m, i) => `
-                <div class="ai-card waiting ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${['#4a9eff','#4ade80','#c084fc','#fbbf24'][i]}">
+                <div class="ai-card waiting ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${colors[i]}">
                     <div class="card-header">
                         <div class="ai-label">
                             <div class="ai-badge ${m.badgeClass}">${m.badgeText}</div>
@@ -382,33 +418,45 @@
             showSkeleton();
             addToHistory(question);
 
-            const response = await fetch("https://consilium-production-48f1.up.railway.app/ask", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({question: question})
-            });
+            try {
+                const response = await fetch("https://consilium-production-48f1.up.railway.app/ask", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({question: question})
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            document.getElementById("answer").innerHTML = models.map((m, i) => `
-                <div class="ai-card ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${['#4a9eff','#4ade80','#c084fc','#fbbf24'][i]}">
-                    <div class="card-header">
-                        <div class="ai-label">
-                            <div class="ai-badge ${m.badgeClass}">${m.badgeText}</div>
-                            ${m.name} <span class="ai-sublabel">· ${m.sub}</span>
+                document.getElementById("answer").innerHTML = models.map((m, i) => `
+                    <div class="ai-card ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${colors[i]}">
+                        <div class="card-header">
+                            <div class="ai-label">
+                                <div class="ai-badge ${m.badgeClass}">${m.badgeText}</div>
+                                ${m.name} <span class="ai-sublabel">· ${m.sub}</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="copy-btn" onclick="copyText(\`${data[m.key].replace(/`/g, '\\`')}\`, this)">Copy</button>
+                            </div>
                         </div>
-                        <button class="copy-btn" onclick="copyText(\`${data[m.key].replace(/`/g, '\\`')}\`, this)">Copy</button>
+                        <div class="ai-content">${marked.parse(data[m.key])}</div>
                     </div>
-                    <div class="ai-content">${marked.parse(data[m.key])}</div>
-                </div>
-            `).join('');
+                `).join('');
+
+            } catch (err) {
+                document.getElementById("answer").innerHTML = `
+                    <div class="ai-card" style="border-left-color: #ff4a4a">
+                        <div class="ai-content" style="color: rgba(255,100,100,0.8)">
+                            Something went wrong. Please try again.
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         document.getElementById("question").addEventListener("keydown", function(e) {
             if (e.key === "Enter") ask();
         });
 
-        // Show waiting cards on load
         renderWaitingCards();
     </script>
 </body>
