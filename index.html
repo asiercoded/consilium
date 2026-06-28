@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ask the AIs</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .layout {
+            display: flex;
+            gap: 0;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 0;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar.open {
+            width: 200px;
+            margin-right: 24px;
+        }
+
+        .sidebar-inner { width: 200px; }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .history-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-item:hover { border-color: #444; color: #e0e0e0; }
+
+        .main { flex: 1; min-width: 0; }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .toggle-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #888;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .toggle-btn:hover { color: #e0e0e0; border-color: #444; opacity: 1; }
+
+        h1 { font-size: 28px; font-weight: 600; color: #ffffff; }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 32px;
+            margin-left: 46px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        input {
+            flex: 1;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: #555; }
+
+        button {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.85; }
+
+        .question-display {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .question-display span { color: #aaa; }
+
+        /* Skeleton */
+        .skeleton-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-label {
+            width: 120px;
+            height: 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .skeleton-line {
+            height: 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* AI Cards */
+        .ai-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border-left: 3px solid transparent;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .ai-card:nth-child(1) { animation-delay: 0.0s; border-left-color: #4a9eff; }
+        .ai-card:nth-child(2) { animation-delay: 0.1s; border-left-color: #4ade80; }
+        .ai-card:nth-child(3) { animation-delay: 0.2s; border-left-color: #c084fc; }
+        .ai-card:nth-child(4) { animation-delay: 0.3s; border-left-color: #fbbf24; }
+
+        /* Waiting cards don't animate */
+        .ai-card.waiting {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-card.synthesis {
+            background: #161616;
+            border-color: #333;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .ai-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .ai-sublabel {
+            font-size: 11px;
+            font-weight: 400;
+            color: #555;
+            margin-left: 2px;
+        }
+
+        .ai-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .badge-meta { background: #1a3a5c; color: #4a9eff; }
+        .badge-scout { background: #1a3a2a; color: #4ade80; }
+        .badge-openai { background: #2a1a3a; color: #c084fc; }
+        .badge-synthesis { background: #3a2a00; color: #fbbf24; }
+
+        .copy-btn {
+            background: #2a2a2a;
+            color: #888;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .copy-btn:hover { background: #333; color: #e0e0e0; opacity: 1; }
+
+        .waiting-text {
+            font-size: 14px;
+            color: #444;
+            font-style: italic;
+        }
+
+        .ai-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #d0d0d0;
+        }
+
+        .ai-content p { margin-bottom: 12px; }
+        .ai-content p:last-child { margin-bottom: 0; }
+        .ai-content strong { color: #ffffff; }
+        .ai-content ul, .ai-content ol { padding-left: 20px; margin-bottom: 12px; }
+        .ai-content li { margin-bottom: 6px; }
+        .ai-content h1, .ai-content h2, .ai-content h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <div class="sidebar-title">History</div>
+                <div id="history"></div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="top-bar">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <h1>Ask the AIs</h1>
+            </div>
+            <p class="subtitle">Three models debate your question. One synthesizes the answer.</p>
+
+            <div class="input-row">
+                <input type="text" id="question" placeholder="Ask anything...">
+                <button onclick="ask()">Ask</button>
+            </div>
+
+            <div class="question-display" id="questionDisplay">
+                Showing results for: <span id="questionText"></span>
+            </div>
+
+            <div id="answer"></div>
+        </div>
+    </div>
+
+    <script>
+        const historyList = [];
+
+        const models = [
+            { key: 'ai1', name: 'LLaMA 3.3', sub: 'Meta', badgeClass: 'badge-meta', badgeText: 'M' },
+            { key: 'ai2', name: 'LLaMA Scout', sub: 'Meta', badgeClass: 'badge-scout', badgeText: 'S' },
+            { key: 'ai3', name: 'GPT-OSS', sub: 'OpenAI', badgeClass: 'badge-openai', badgeText: 'O' },
+            { key: 'synthesis', name: 'Final Synthesis', sub: 'Synthesizer', badgeClass: 'badge-synthesis', badgeText: '⚡', isSynthesis: true },
+        ];
+
+        function renderWaitingCards() {
+            document.getElementById("answer").innerHTML = models.map((m, i) => `
+                <div class="ai-card waiting ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${['#4a9eff','#4ade80','#c084fc','#fbbf24'][i]}">
+                    <div class="card-header">
+                        <div class="ai-label">
+                            <div class="ai-badge ${m.badgeClass}">${m.badgeText}</div>
+                            ${m.name} <span class="ai-sublabel">· ${m.sub}</span>
+                        </div>
+                    </div>
+                    <div class="waiting-text">Waiting for your question...</div>
+                </div>
+            `).join('');
+        }
+
+        function showSkeleton() {
+            document.getElementById("answer").innerHTML = [1,2,3,4].map(() => `
+                <div class="skeleton-card">
+                    <div class="skeleton-label"></div>
+                    <div class="skeleton-line" style="width:90%"></div>
+                    <div class="skeleton-line" style="width:75%"></div>
+                    <div class="skeleton-line" style="width:85%"></div>
+                    <div class="skeleton-line" style="width:60%"></div>
+                </div>
+            `).join('');
+        }
+
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text);
+            btn.innerText = "Copied!";
+            setTimeout(() => btn.innerText = "Copy", 2000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function addToHistory(question) {
+            if (!historyList.includes(question)) {
+                historyList.unshift(question);
+                if (historyList.length > 10) historyList.pop();
+            }
+            document.getElementById("history").innerHTML = historyList.map(q => `
+                <div class="history-item" onclick="askQuestion('${q.replace(/'/g, "\\'")}')">${q}</div>
+            `).join('');
+        }
+
+        async function askQuestion(q) {
+            document.getElementById("question").value = q;
+            await ask();
+        }
+
+        async function ask() {
+            const question = document.getElementById("question").value;
+            if (!question.trim()) return;
+
+            document.getElementById("questionDisplay").style.display = "block";
+            document.getElementById("questionText").innerText = question;
+
+            showSkeleton();
+            addToHistory(question);
+
+            const response = await fetch("http://127.0.0.1:5000/ask", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({question: question})
+            });
+
+            const data = await response.json();
+
+            document.getElementById("answer").innerHTML = models.map((m, i) => `
+                <div class="ai-card ${m.isSynthesis ? 'synthesis' : ''}" style="border-left-color: ${['#4a9eff','#4ade80','#c084fc','#fbbf24'][i]}">
+                    <div class="card-header">
+                        <div class="ai-label">
+                            <div class="ai-badge ${m.badgeClass}">${m.badgeText}</div>
+                            ${m.name} <span class="ai-sublabel">· ${m.sub}</span>
+                        </div>
+                        <button class="copy-btn" onclick="copyText(\`${data[m.key].replace(/`/g, '\\`')}\`, this)">Copy</button>
+                    </div>
+                    <div class="ai-content">${marked.parse(data[m.key])}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById("question").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") ask();
+        });
+
+        // Show waiting cards on load
+        renderWaitingCards();
+    </script>
+</body>
+</html>
