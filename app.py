@@ -1,11 +1,15 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from groq import Groq
 
 app = Flask(__name__)
 CORS(app)
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
 
 @app.route("/ask", methods=["POST"])
 def ask():
