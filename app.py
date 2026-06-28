@@ -26,7 +26,7 @@ def ask():
     )
     first_ai_response = response_a.choices[0].message.content
 
-    # AI 2 — Qwen3 (thinking disabled)
+    # AI 2 — llama scout4
     response_b = client.chat.completions.create(
         model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[

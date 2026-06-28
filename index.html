@@ -55,7 +55,6 @@ body {
   padding: 48px 24px 80px;
 }
 
-/* ── HEADER ── */
 header {
   display: flex;
   align-items: flex-start;
@@ -72,9 +71,7 @@ header {
   color: var(--text);
 }
 
-.wordmark span {
-  color: var(--gold);
-}
+.wordmark span { color: var(--gold); }
 
 .header-right {
   display: flex;
@@ -103,7 +100,6 @@ header {
   border-color: var(--border-strong);
 }
 
-/* ── HERO ── */
 .hero {
   text-align: center;
   margin-bottom: 52px;
@@ -132,7 +128,6 @@ header {
   line-height: 1.6;
 }
 
-/* ── INPUT ── */
 .input-shell {
   max-width: 680px;
   margin: 0 auto 56px;
@@ -145,9 +140,7 @@ header {
   transition: border-color 0.2s;
 }
 
-.input-shell:focus-within {
-  border-color: rgba(255,255,255,0.28);
-}
+.input-shell:focus-within { border-color: rgba(255,255,255,0.28); }
 
 .input-shell input {
   flex: 1;
@@ -181,11 +174,13 @@ header {
 .ask-btn:active { transform: scale(0.97); }
 .ask-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── QUESTION BADGE ── */
 .q-badge {
   text-align: center;
   margin-bottom: 28px;
   display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .q-badge span {
@@ -196,13 +191,34 @@ header {
   padding: 6px 16px;
   font-size: 13px;
   color: var(--text-muted);
-  max-width: 600px;
+  max-width: 500px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ── DEBATE GRID ── */
+.share-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.share-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
 .debate-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -214,7 +230,6 @@ header {
   .debate-grid { grid-template-columns: 1fr; }
 }
 
-/* ── AI CARD ── */
 .ai-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -326,7 +341,6 @@ header {
   font-size: 12px;
 }
 
-/* ── THINKING ── */
 .thinking {
   display: flex;
   gap: 5px;
@@ -349,7 +363,6 @@ header {
   40% { opacity: 1; transform: scale(1.15); }
 }
 
-/* ── SYNTHESIS CARD ── */
 .synthesis-card {
   background: var(--gold-dim);
   border: 1px solid rgba(251,191,36,0.18);
@@ -405,7 +418,6 @@ header {
   color: rgba(255,255,255,0.82);
 }
 
-/* ── HISTORY DRAWER ── */
 .drawer-overlay {
   display: none;
   position: fixed;
@@ -461,14 +473,12 @@ header {
   color: var(--text);
 }
 
-/* ── WAITING STATE ── */
 .waiting-msg {
   font-size: 13px;
   color: var(--text-faint);
   font-style: italic;
 }
 
-/* ── COLOR THEMES ── */
 .theme-amber .card-bar-fill { background: var(--amber); }
 .theme-amber .badge { background: var(--amber-dim); color: var(--amber); }
 .theme-amber .card-name { color: var(--amber); }
@@ -481,7 +491,6 @@ header {
 .theme-violet .badge { background: var(--violet-dim); color: var(--violet); }
 .theme-violet .card-name { color: var(--violet); }
 
-/* card-name default for non-themed */
 .card-name { color: var(--text); }
 </style>
 </head>
@@ -502,6 +511,10 @@ header {
       <button class="history-btn" onclick="openDrawer()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         History
+      </button>
+      <button class="history-btn" id="shareBtn" style="display:none" onclick="shareResult()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
       </button>
     </div>
   </header>
@@ -591,12 +604,6 @@ header {
 const BACKEND = "https://consilium-production-48f1.up.railway.app";
 const history = [];
 
-const models = [
-  { key: 'ai1', theme: 'theme-amber' },
-  { key: 'ai2', theme: 'theme-cyan' },
-  { key: 'ai3', theme: 'theme-violet' },
-];
-
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('overlay').classList.add('open');
@@ -670,12 +677,23 @@ function copySynth(btn) {
   copyText(lastSynthText, btn);
 }
 
+function shareResult() {
+  const q = document.getElementById('qText').textContent;
+  const url = `${window.location.origin}?q=${encodeURIComponent(q)}`;
+  navigator.clipboard.writeText(url);
+  const btn = document.getElementById('shareBtn');
+  const original = btn.innerHTML;
+  btn.innerText = 'Copied!';
+  setTimeout(() => btn.innerHTML = original, 2000);
+}
+
 async function ask() {
   const q = document.getElementById('question').value.trim();
   if (!q) return;
 
   document.getElementById('askBtn').disabled = true;
-  document.getElementById('qBadge').style.display = 'block';
+  document.getElementById('shareBtn').style.display = 'none';
+  document.getElementById('qBadge').style.display = 'flex';
   document.getElementById('qText').textContent = q;
   addHistory(q);
 
@@ -731,6 +749,7 @@ async function ask() {
     finishBar(synthCard);
     synthContent.innerHTML = marked.parse(lastSynthText);
     synthCopy.style.display = 'block';
+    document.getElementById('shareBtn').style.display = 'flex';
 
   } catch(e) {
     document.querySelectorAll('.card-content').forEach(c => {
@@ -743,6 +762,15 @@ async function ask() {
 
 document.getElementById('question').addEventListener('keydown', e => {
   if (e.key === 'Enter') ask();
+});
+
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (q) {
+    document.getElementById('question').value = q;
+    ask();
+  }
 });
 </script>
 </body>
