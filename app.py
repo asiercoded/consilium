@@ -9,9 +9,9 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 MODELS = {
     "ai1": "llama-3.3-70b-versatile",
-    "ai2": "mixtral-8x7b-32768",
-    "ai3": "gemma2-9b-it",
-    "synthesis": "deepseek-r1-distill-llama-70b",
+    "ai2": "meta-llama/llama-4-scout-17b-16e-instruct",
+    "ai3": "qwen/qwen3-32b",
+    "synthesis": "openai/gpt-oss-20b",
 }
 
 @app.route("/")
