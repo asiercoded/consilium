@@ -9,8 +9,8 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 MODELS = {
     "ai1": "llama-3.3-70b-versatile",
-    "ai2": "meta-llama/llama-4-scout-17b-16e-instruct",
-    "ai3": "qwen/qwen3-32b",
+    "ai2": "qwen/qwen3-32b",
+    "ai3": "openai/gpt-oss-120b",
     "synthesis": "openai/gpt-oss-20b",
 }
 
@@ -56,8 +56,9 @@ def ask():
     # AI 4 — DeepSeek: Synthesizes the debate into a final answer
     response_d = client.chat.completions.create(
         model=MODELS["synthesis"],
+        max_tokens=1500,
         messages=[
-            {"role": "system", "content": "You are a synthesis engine. Three AIs have debated a question. Your job: read the full debate, identify which arguments are strongest, resolve contradictions, and produce one clear, definitive answer. Be concise. Don't list all views — give the best answer."},
+            {"role": "system", "content": "You are a synthesis engine. Three AIs have debated a question. Read the full debate carefully, identify the strongest arguments, resolve contradictions, and produce a comprehensive, well-structured final answer. Be thorough — don't just summarize, give the definitive answer a smart person would want to read."},
             {"role": "user", "content": f"Question: {user_question}\n\nAI 1 (Llama):\n{first_ai_response}\n\nAI 2 (Mixtral) challenged:\n{second_ai_response}\n\nAI 3 (Gemma) independent take:\n{third_ai_response}\n\nSynthesize into the best possible answer."}
         ]
     )
