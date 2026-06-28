@@ -1,4 +1,5 @@
 flask
 flask-cors
 groq
+openai
 python-dotenv
