@@ -28,8 +28,7 @@ def ask():
 
     # AI 2 — Qwen3 (thinking disabled)
     response_b = client.chat.completions.create(
-        model="qwen/qwen3-32b",
-        extra_body={"thinking": {"type": "disabled"}},
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[
             {"role": "system", "content": "You are a critical contrarian. You've read another AI's response and your job is to challenge it — find flaws, missing angles, or outright disagree where warranted. Don't just add on, push back."},
             {"role": "user", "content": f"Question: {user_question}\n\nAnother AI said:\n{first_ai_response}\n\nChallenge this response."}
